@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIFA World Cup 2026 Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            max-height: 800px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            border-bottom: 3px solid #ffd700;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .info-banner {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-item strong {
+            color: #2a5298;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .user-message {
+            flex-direction: row-reverse;
+        }
+
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .bot-message .message-avatar {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .input-container {
+            padding: 20px 30px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .quick-actions {
+            padding: 15px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .quick-action-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .quick-action-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        #userInput:focus {
+            border-color: #667eea;
+        }
+
+        #sendButton {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        #sendButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        #sendButton:active {
+            transform: translateY(0);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .welcome-message h2 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .welcome-message p {
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 10px 30px;
+            border-left: 4px solid #c33;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .info-banner {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ FIFA World Cup 2026 Assistant</h1>
+            <p>Your personal guide for the biggest football tournament</p>
+        </div>
+
+        <div class="info-banner">
+            <div class="info-item">
+                <strong>📅 Dates:</strong> June 11 - July 19, 2026
+            </div>
+            <div class="info-item">
+                <strong>🏟️ Cities:</strong> 16 host cities
+            </div>
+            <div class="info-item">
+                <strong>🏆 Teams:</strong> 48 teams
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <button class="quick-action-btn" onclick="sendQuickMessage('What are the host cities?')">🌎 Host Cities</button>
+            <button class="quick-action-btn" onclick="sendQuickMessage('Tell me about accommodations in New York')">🏨 Hotels</button>
+            <button class="quick-action-btn" onclick="sendQuickMessage('What visa do I need?')">📄 Visa Info</button>
+            <button class="quick-action-btn" onclick="sendQuickMessage('When is the final?')">🏆 Final Date</button>
+            <button class="quick-action-btn" onclick="sendQuickMessage('Budget tips for attending')">💰 Budget Tips</button>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <h2>Welcome to FIFA World Cup 2026! 🎉</h2>
+                <p>I'm your AI assistant ready to help you plan your World Cup experience.</p>
+                <p>Ask me about:</p>
+                <p>🏟️ Stadiums & Cities • 🏨 Hotels & Airbnb • ✈️ Travel Tips • 🎫 Tickets • 📅 Schedule</p>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="message-avatar">🤖</div>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="userInput" 
+                placeholder="Ask me anything about FIFA World Cup 2026..." 
+                onkeypress="handleKeyPress(event)"
+            >
+            <button id="sendButton" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // ⚙️ CONFIGURATION - Replace with your n8n webhook URL
+        // For local n8n: http://localhost:5678/webhook/fifa-chat
+        // For ngrok: https://YOUR_NGROK_URL/webhook/fifa-chat
+        //const WEBHOOK_URL = 'http://localhost:5678/webhook/fifa-chat';//DEV
+
+        const WEBHOOK_URL = 'https://thiernia.app.n8n.cloud/webhook/fifa-chat' //Prod
+
+        
+        // Set to true to see debug information in console
+        const DEBUG_MODE = true;
+
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendQuickMessage(message) {
+            userInput.value = message;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+
+            // Check if webhook URL is configured
+            if (WEBHOOK_URL === 'YOUR_N8N_WEBHOOK_URL_HERE') {
+                alert('⚠️ Please configure your n8n webhook URL in the code (line 327)');
+                return;
+            }
+
+            // Clear input and disable button
+            userInput.value = '';
+            sendButton.disabled = true;
+
+            // Remove welcome message if exists
+            const welcomeMsg = document.querySelector('.welcome-message');
+            if (welcomeMsg) welcomeMsg.remove();
+
+            // Add user message
+            addMessage(message, 'user');
+
+            // Show typing indicator
+            typingIndicator.classList.add('active');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                if (DEBUG_MODE) {
+                    console.log('Sending to n8n:', WEBHOOK_URL);
+                    console.log('Message:', message);
+                }
+
+                // Call n8n webhook with correct format for Chat Trigger
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chatInput: message,
+                        sessionId: getSessionId()
+                    })
+                });
+
+                if (DEBUG_MODE) {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (DEBUG_MODE) {
+                    console.log('Response data:', data);
+                }
+
+                // Hide typing indicator
+                typingIndicator.classList.remove('active');
+
+                // Extract bot response - try multiple possible paths
+                let botMessage = '';
+                
+                if (data.output) {
+                    botMessage = data.output;
+                } else if (data.response) {
+                    botMessage = data.response;
+                } else if (data.message) {
+                    botMessage = data.message;
+                } else if (data.text) {
+                    botMessage = data.text;
+                } else if (typeof data === 'string') {
+                    botMessage = data;
+                } else {
+                    console.error('Unexpected response format:', data);
+                    botMessage = "I received your message but couldn't format the response properly. Please check the console for details.";
+                }
+
+                // Add bot response
+                addMessage(botMessage, 'bot');
+
+            } catch (error) {
+                console.error('Error details:', error);
+                typingIndicator.classList.remove('active');
+                
+                // Show detailed error message
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `
+                    <strong>❌ Connection Error</strong><br>
+                    ${error.message}<br>
+                    <small>Check browser console (F12) for more details</small><br>
+                    <br>
+                    <strong>Troubleshooting:</strong><br>
+                    1️⃣ Make sure your n8n workflow is <strong>activated</strong><br>
+                    2️⃣ Check if the webhook URL is correct<br>
+                    3️⃣ Verify CORS is enabled in n8n settings<br>
+                    4️⃣ Open browser console (F12) to see detailed error
+                `;
+                chatContainer.appendChild(errorDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            // Re-enable button
+            sendButton.disabled = false;
+            userInput.focus();
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = sender === 'user' ? '👤' : '🤖';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = formatMessage(text);
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function formatMessage(text) {
+            // Convert markdown-style formatting to HTML
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            text = text.replace(/\n/g, '<br>');
+            
+            // Convert URLs to links
+            text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color: #667eea;">$1</a>');
+            
+            return text;
+        }
+
+        function getSessionId() {
+            // Generate or retrieve session ID
+            let sessionId = localStorage.getItem('fifa_chat_session');
+            if (!sessionId) {
+                sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('fifa_chat_session', sessionId);
+            }
+            return sessionId;
+        }
+
+        // Focus input on load
+        window.onload = () => {
+            userInput.focus();
+        };
+    </script>
+</body>
+</html>
